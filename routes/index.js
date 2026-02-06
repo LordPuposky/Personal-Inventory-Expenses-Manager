@@ -9,4 +9,9 @@ router.get('/', (req, res) => {
 // Link to Swagger
 router.use('/', require('./swagger'));
 
+// Inventory routes
+router.use('/', require('./inventory'));
+// Suppliers routes
+router.use('/', require('./supplier'));
+
 module.exports = router;
