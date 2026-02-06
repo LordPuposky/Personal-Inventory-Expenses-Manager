@@ -1,17 +1,20 @@
 const express = require('express');
 const router = express.Router();
 
-// Test route to verify the skeleton works
+// Root route to verify API status
 router.get('/', (req, res) => {
-    res.send('PIEM API Skeleton is running');
+    res.send('PIEM API is running with all collections');
 });
 
-// Link to Swagger
+// Documentation route (Swagger UI)
 router.use('/', require('./swagger'));
 
-// Inventory routes
-router.use('/', require('./inventory'));
-// Suppliers routes
-router.use('/', require('./supplier'));
+// Uthman's collections: Users and Categories
+router.use('/users', require('./users'));
+router.use('/categories', require('./categories'));
+
+// Emmanuel's collections: Inventory and Suppliers
+router.use('/inventory', require('./inventory'));
+router.use('/supplier', require('./supplier'));
 
 module.exports = router;

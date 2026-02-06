@@ -15,12 +15,14 @@ const options = {
         },
         servers: [
             {
-                url: process.env.BASE_URL || 'http://localhost:3000',
-                description: 'Development server'
+                // Main production URL on Render
+                url: 'https://personal-inventory-expenses-manager-api.onrender.com',
+                description: 'Production server (Render)'
             },
             {
-                url: 'https://cse341-code-student.onrender.com',
-                description: 'Production server'
+                // Local development server on port 8080
+                url: 'http://localhost:8080',
+                description: 'Local development server'
             }
         ],
         components: {
@@ -33,114 +35,38 @@ const options = {
                 }
             },
             schemas: {
+                // Global schema definitions so Swagger knows the expected structures
                 User: {
                     type: 'object',
-                    required: ['username', 'email'],
                     properties: {
-                        _id: {
-                            type: 'string',
-                            description: 'Auto-generated user ID'
-                        },
-                        username: {
-                            type: 'string',
-                            minLength: 3,
-                            description: 'Unique username'
-                        },
-                        email: {
-                            type: 'string',
-                            format: 'email',
-                            description: 'User email address'
-                        },
-                        githubId: {
-                            type: 'string',
-                            description: 'GitHub OAuth ID'
-                        },
-                        profilePicture: {
-                            type: 'string',
-                            description: 'URL to profile picture'
-                        },
-                        role: {
-                            type: 'string',
-                            enum: ['user', 'admin'],
-                            default: 'user'
-                        },
-                        createdAt: {
-                            type: 'string',
-                            format: 'date-time'
-                        },
-                        updatedAt: {
-                            type: 'string',
-                            format: 'date-time'
-                        }
+                        _id: { type: 'string' },
+                        username: { type: 'string' },
+                        email: { type: 'string' }
                     }
                 },
                 Category: {
                     type: 'object',
-                    required: ['name', 'createdBy'],
                     properties: {
-                        _id: {
-                            type: 'string',
-                            description: 'Auto-generated category ID'
-                        },
-                        name: {
-                            type: 'string',
-                            minLength: 2,
-                            maxLength: 50,
-                            description: 'Category name'
-                        },
-                        description: {
-                            type: 'string',
-                            maxLength: 200,
-                            description: 'Category description'
-                        },
-                        createdBy: {
-                            $ref: '#/components/schemas/User',
-                            description: 'User who created the category'
-                        },
-                        itemCount: {
-                            type: 'integer',
-                            minimum: 0,
-                            default: 0
-                        },
-                        isActive: {
-                            type: 'boolean',
-                            default: true
-                        },
-                        createdAt: {
-                            type: 'string',
-                            format: 'date-time'
-                        },
-                        updatedAt: {
-                            type: 'string',
-                            format: 'date-time'
-                        }
+                        _id: { type: 'string' },
+                        name: { type: 'string' },
+                        description: { type: 'string' }
                     }
                 },
-                Error: {
+                Inventory: {
                     type: 'object',
                     properties: {
-                        success: {
-                            type: 'boolean',
-                            default: false
-                        },
-                        message: {
-                            type: 'string',
-                            description: 'Error message'
-                        },
-                        errors: {
-                            type: 'array',
-                            items: {
-                                type: 'object',
-                                properties: {
-                                    field: {
-                                        type: 'string'
-                                    },
-                                    message: {
-                                        type: 'string'
-                                    }
-                                }
-                            }
-                        }
+                        _id: { type: 'string' },
+                        name: { type: 'string' },
+                        quantity: { type: 'integer' },
+                        price: { type: 'number' }
+                    }
+                },
+                Supplier: {
+                    type: 'object',
+                    properties: {
+                        _id: { type: 'string' },
+                        name: { type: 'string' },
+                        contact: { type: 'string' }
                     }
                 }
             }
@@ -151,22 +77,23 @@ const options = {
             }
         ]
     },
-    apis: ['./routes/*.js'] // Path to the API routes
+    // Scan all .js files in the routes folder to extract documentation
+    apis: ['./routes/*.js']
 };
 
 const swaggerSpec = swaggerJsdoc(options);
 
 const swaggerDocs = (app) => {
-    // Swagger UI route
+    // Route that serves the Swagger UI interface
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-    
-    // Swagger JSON route
+
+    // Route that exposes the generated OpenAPI JSON
     app.get('/api-docs.json', (req, res) => {
         res.setHeader('Content-Type', 'application/json');
         res.send(swaggerSpec);
     });
-    
-    console.log(`Swagger docs available at /api-docs`);
+
+    console.log('Swagger docs available at /api-docs');
 };
 
 module.exports = swaggerDocs;
