@@ -1,18 +1,25 @@
-const User = require('../models/user');
+const mongodb = require('../db/connect');
+const { ObjectId } = require('mongodb');
+// const User = require('../models/user'); // Mongoose is not used in Week 05
 
 // Get all users (Admin only)
 const getAllUsers = async (req, res) => {
     try {
         // Check if user is admin
+        // ⚠️ WEEK 06: Authentication and req.user will be active in Week 06
+        /*
         if (req.user.role !== 'admin') {
             return res.status(403).json({
                 success: false,
                 message: 'Access denied. Admin privileges required.'
             });
         }
+        */
 
-        const users = await User.find().select('-__v');
-        
+        // ⚠️ WEEK 05: Using native MongoDB driver instead of Mongoose (User.find)
+        const db = mongodb.getDb();
+        const users = await db.collection('users').find().toArray();
+
         res.status(200).json({
             success: true,
             count: users.length,
@@ -32,29 +39,24 @@ const getAllUsers = async (req, res) => {
 const getUserById = async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         // Check if the ID is valid
-        if (!mongoose.Types.ObjectId.isValid(id)) {
+        // ⚠️ WEEK 05: Using ObjectId.isValid from mongodb driver
+        if (!ObjectId.isValid(id)) {
             return res.status(400).json({
                 success: false,
                 message: 'Invalid user ID format'
             });
         }
 
-        const user = await User.findById(id).select('-__v');
-        
+        // ⚠️ WEEK 05: Using native findOne instead of User.findById
+        const db = mongodb.getDb();
+        const user = await db.collection('users').findOne({ _id: new ObjectId(id) });
+
         if (!user) {
             return res.status(404).json({
                 success: false,
                 message: 'User not found'
-            });
-        }
-
-        // Check if user is viewing their own profile or is admin
-        if (req.user.id !== id && req.user.role !== 'admin') {
-            return res.status(403).json({
-                success: false,
-                message: 'Access denied. You can only view your own profile.'
             });
         }
 
@@ -72,68 +74,31 @@ const getUserById = async (req, res) => {
     }
 };
 
-// Create new user (Admin only)
+// Create new user
 const createUser = async (req, res) => {
     try {
-        // Check if user is admin
-        if (req.user.role !== 'admin') {
-            return res.status(403).json({
-                success: false,
-                message: 'Access denied. Admin privileges required.'
-            });
-        }
+        const { username, email, role, firstName, lastName } = req.body;
 
-        const { username, email, role } = req.body;
-
-        // Validate required fields
-        if (!username || !email) {
-            return res.status(400).json({
-                success: false,
-                message: 'Username and email are required'
-            });
-        }
-
-        // Check if user already exists
-        const existingUser = await User.findOne({
-            $or: [{ email }, { username }]
-        });
-
-        if (existingUser) {
-            return res.status(409).json({
-                success: false,
-                message: 'User with this email or username already exists'
-            });
-        }
-
-        // Create new user
-        const newUser = new User({
+        // ⚠️ WEEK 05: Using native insertOne instead of User.create
+        const db = mongodb.getDb();
+        const newUser = {
             username,
             email,
-            role: role || 'user'
-        });
+            role: role || 'user',
+            firstName,
+            lastName,
+            createdAt: new Date()
+        };
 
-        await newUser.save();
-
-        // Remove sensitive data from response
-        const userResponse = newUser.toObject();
-        delete userResponse.__v;
+        const result = await db.collection('users').insertOne(newUser);
 
         res.status(201).json({
             success: true,
             message: 'User created successfully',
-            data: userResponse
+            userId: result.insertedId.toString()
         });
     } catch (error) {
         console.error('Error creating user:', error);
-        
-        if (error.name === 'ValidationError') {
-            return res.status(400).json({
-                success: false,
-                message: 'Validation error',
-                errors: Object.values(error.errors).map(err => err.message)
-            });
-        }
-
         res.status(500).json({
             success: false,
             message: 'Server error while creating user',
@@ -148,84 +113,34 @@ const updateUser = async (req, res) => {
         const { id } = req.params;
         const updates = req.body;
 
-        // Check if the ID is valid
-        if (!mongoose.Types.ObjectId.isValid(id)) {
+        // ⚠️ WEEK 05: Using ObjectId.isValid
+        if (!ObjectId.isValid(id)) {
             return res.status(400).json({
                 success: false,
                 message: 'Invalid user ID format'
             });
         }
 
-        // Check if user exists
-        const user = await User.findById(id);
-        if (!user) {
+        // ⚠️ WEEK 05: Using native updateOne instead of User.findByIdAndUpdate
+        const db = mongodb.getDb();
+        const result = await db.collection('users').updateOne(
+            { _id: new ObjectId(id) },
+            { $set: { ...updates, updatedAt: new Date() } }
+        );
+
+        if (result.matchedCount === 0) {
             return res.status(404).json({
                 success: false,
                 message: 'User not found'
             });
         }
 
-        // Check if user is updating their own profile or is admin
-        if (req.user.id !== id && req.user.role !== 'admin') {
-            return res.status(403).json({
-                success: false,
-                message: 'Access denied. You can only update your own profile.'
-            });
-        }
-
-        // Prevent role update for non-admin users
-        if (updates.role && req.user.role !== 'admin') {
-            return res.status(403).json({
-                success: false,
-                message: 'Only admins can change user roles'
-            });
-        }
-
-        // Check for duplicate email or username
-        if (updates.email || updates.username) {
-            const duplicateQuery = {
-                _id: { $ne: id } // Exclude current user
-            };
-
-            if (updates.email) duplicateQuery.email = updates.email;
-            if (updates.username) duplicateQuery.username = updates.username;
-
-            const duplicate = await User.findOne(duplicateQuery);
-            if (duplicate) {
-                return res.status(409).json({
-                    success: false,
-                    message: 'Email or username already exists'
-                });
-            }
-        }
-
-        // Update user
-        Object.keys(updates).forEach(key => {
-            user[key] = updates[key];
-        });
-
-        await user.save();
-
-        // Remove sensitive data from response
-        const userResponse = user.toObject();
-        delete userResponse.__v;
-
         res.status(200).json({
             success: true,
-            message: 'User updated successfully',
-            data: userResponse
+            message: 'User updated successfully'
         });
     } catch (error) {
         console.error('Error updating user:', error);
-        
-        if (error.name === 'ValidationError') {
-            return res.status(400).json({
-                success: false,
-                message: 'Validation error',
-                errors: Object.values(error.errors).map(err => err.message)
-            });
-        }
-
         res.status(500).json({
             success: false,
             message: 'Server error while updating user',
@@ -234,21 +149,24 @@ const updateUser = async (req, res) => {
     }
 };
 
-// Delete user (Admin only)
+// Delete user
 const deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
 
         // Check if user is admin
+        // ⚠️ WEEK 06: Admin authentication required
+        /*
         if (req.user.role !== 'admin') {
             return res.status(403).json({
                 success: false,
                 message: 'Access denied. Admin privileges required.'
             });
         }
+        */
 
         // Check if the ID is valid
-        if (!mongoose.Types.ObjectId.isValid(id)) {
+        if (!ObjectId.isValid(id)) {
             return res.status(400).json({
                 success: false,
                 message: 'Invalid user ID format'
@@ -256,16 +174,21 @@ const deleteUser = async (req, res) => {
         }
 
         // Prevent self-deletion
+        // ⚠️ WEEK 06: Identity check requires req.user
+        /*
         if (req.user.id === id) {
             return res.status(400).json({
                 success: false,
                 message: 'Cannot delete your own account'
             });
         }
+        */
 
-        const user = await User.findByIdAndDelete(id);
+        // ⚠️ WEEK 05: Using native deleteOne instead of User.findByIdAndDelete
+        const db = mongodb.getDb();
+        const result = await db.collection('users').deleteOne({ _id: new ObjectId(id) });
 
-        if (!user) {
+        if (result.deletedCount === 0) {
             return res.status(404).json({
                 success: false,
                 message: 'User not found'
