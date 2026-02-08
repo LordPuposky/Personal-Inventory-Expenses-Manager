@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
 const usersController = require('../controllers/usersController');
-const { isAuthenticated, isAdmin } = require('../middleware/auth');
+// const { isAuthenticated, isAdmin } = require('../middleware/auth'); // ⚠️ COMENTADO PARA SEMANA 5
 const { validate } = require('../middleware/validation');
 
 // Validation rules
@@ -41,7 +41,7 @@ const userValidationRules = {
  * @swagger
  * tags:
  *   name: Users
- *   description: User management endpoints (Admin only for most operations)
+ *   description: User management endpoints
  */
 
 /**
@@ -49,10 +49,8 @@ const userValidationRules = {
  * /users:
  *   get:
  *     summary: Retrieve all users
- *     description: Get a list of all registered users. **Admin access required.**
+ *     description: Get a list of all registered users
  *     tags: [Users]
- *     security:
- *       - sessionAuth: []
  *     responses:
  *       200:
  *         description: Successfully retrieved user list
@@ -71,18 +69,6 @@ const userValidationRules = {
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/User'
- *       401:
- *         description: Not authenticated - Login required
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       403:
- *         description: Forbidden - Admin privileges required
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  *       500:
  *         description: Internal server error
  *         content:
@@ -90,17 +76,16 @@ const userValidationRules = {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/', isAuthenticated, isAdmin, usersController.getAllUsers);
+// ⚠️ AUTENTICACIÓN REMOVIDA TEMPORALMENTE PARA SEMANA 5
+router.get('/', /* isAuthenticated, isAdmin, */ usersController.getAllUsers);
 
 /**
  * @swagger
  * /users/{id}:
  *   get:
  *     summary: Get a specific user by ID
- *     description: Retrieve details of a single user. Users can view their own profile, admins can view any profile.
+ *     description: Retrieve details of a single user
  *     tags: [Users]
- *     security:
- *       - sessionAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -125,46 +110,20 @@ router.get('/', isAuthenticated, isAdmin, usersController.getAllUsers);
  *                   $ref: '#/components/schemas/User'
  *       400:
  *         description: Invalid user ID format
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       401:
- *         description: Not authenticated
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       403:
- *         description: Forbidden - Cannot view other users' profiles
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  *       404:
  *         description: User not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  *       500:
  *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  */
-router.get('/:id', isAuthenticated, usersController.getUserById);
+router.get('/:id', /* isAuthenticated, */ usersController.getUserById);
 
 /**
  * @swagger
  * /users:
  *   post:
  *     summary: Create a new user
- *     description: Register a new user account. **Admin access required.**
+ *     description: Register a new user account
  *     tags: [Users]
- *     security:
- *       - sessionAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -206,39 +165,14 @@ router.get('/:id', isAuthenticated, usersController.getUserById);
  *                   $ref: '#/components/schemas/User'
  *       400:
  *         description: Validation error or missing required fields
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       401:
- *         description: Not authenticated
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       403:
- *         description: Forbidden - Admin privileges required
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  *       409:
  *         description: Conflict - User with email or username already exists
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  *       500:
  *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  */
 router.post(
     '/',
-    isAuthenticated,
-    isAdmin,
+    /* isAuthenticated, isAdmin, */ // ⚠️ COMENTADO PARA SEMANA 5
     userValidationRules.create,
     validate,
     usersController.createUser
@@ -249,10 +183,8 @@ router.post(
  * /users/{id}:
  *   put:
  *     summary: Update a user's profile
- *     description: Update user information. Users can update their own profile, admins can update any profile.
+ *     description: Update user information
  *     tags: [Users]
- *     security:
- *       - sessionAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -284,59 +216,18 @@ router.post(
  *     responses:
  *       200:
  *         description: User updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: User updated successfully
- *                 data:
- *                   $ref: '#/components/schemas/User'
  *       400:
  *         description: Invalid ID or validation error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       401:
- *         description: Not authenticated
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       403:
- *         description: Forbidden - Cannot update other users' profiles
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  *       404:
  *         description: User not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  *       409:
  *         description: Conflict - Email or username already exists
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  *       500:
  *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  */
 router.put(
     '/:id',
-    isAuthenticated,
+    /* isAuthenticated, */ // ⚠️ COMENTADO PARA SEMANA 5
     userValidationRules.update,
     validate,
     usersController.updateUser
@@ -347,10 +238,8 @@ router.put(
  * /users/{id}:
  *   delete:
  *     summary: Delete a user account
- *     description: Permanently delete a user account. **Admin access required. Cannot delete your own account.**
+ *     description: Permanently delete a user account
  *     tags: [Users]
- *     security:
- *       - sessionAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -363,48 +252,13 @@ router.put(
  *     responses:
  *       200:
  *         description: User deleted successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: User deleted successfully
  *       400:
- *         description: Invalid ID or attempting to delete own account
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       401:
- *         description: Not authenticated
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       403:
- *         description: Forbidden - Admin privileges required
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
+ *         description: Invalid ID
  *       404:
  *         description: User not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  *       500:
  *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  */
-router.delete('/:id', isAuthenticated, isAdmin, usersController.deleteUser);
+router.delete('/:id', /* isAuthenticated, isAdmin, */ usersController.deleteUser);
 
 module.exports = router;

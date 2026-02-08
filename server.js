@@ -1,8 +1,8 @@
 const express = require('express');
 const mongodb = require('./db/connect');
-const session = require('express-session');
-const passport = require('passport');
-const GitHubStrategy = require('passport-github2').Strategy;
+// const session = require('express-session');
+// const passport = require('passport');
+// const GitHubStrategy = require('passport-github2').Strategy;
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
@@ -45,7 +45,9 @@ app.use((req, res, next) => {
 
 // ============================================
 // SESSION AND PASSPORT CONFIGURATION (OAuth)
+// ⚠️ DESHABILITADO TEMPORALMENTE PARA SEMANA 5
 // ============================================
+/*
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your-session-secret-key-here',
     resave: false,
@@ -73,10 +75,13 @@ passport.use(new GitHubStrategy({
 
 passport.serializeUser((user, done) => { done(null, user); });
 passport.deserializeUser((user, done) => { done(null, user); });
+*/
 
 // ============================================
 // AUTHENTICATION ROUTES
+// ⚠️ DESHABILITADO TEMPORALMENTE PARA SEMANA 5
 // ============================================
+/*
 app.get('/login', passport.authenticate('github', { scope: ['user:email'] }));
 
 app.get('/logout', function (req, res, next) {
@@ -93,6 +98,7 @@ app.get('/github/callback',
         res.redirect('/api-docs');
     }
 );
+*/
 
 // ============================================
 // API ROUTES
@@ -106,6 +112,7 @@ app.get('/health', (req, res) => {
         timestamp: new Date().toISOString(),
         service: 'Personal Inventory & Expenses Manager',
         version: '1.0.0',
+        mode: 'Week 5 - OAuth Disabled',
         database: mongodb.getDb() ? 'connected' : 'disconnected'
     });
 });
@@ -160,15 +167,22 @@ mongodb.initDb((err, mongodb) => {
             console.log('='.repeat(50));
             console.log(`✅ Server started successfully!`);
             console.log(`📡 Port: ${port}`);
-            console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
+            console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+            console.log(`⚠️  Mode: WEEK 5 - OAuth Disabled`);
             console.log(`📚 API Documentation: http://localhost:${port}/api-docs`);
-            console.log(`❤️ Health Check: http://localhost:${port}/health`);
+            console.log(`❤️  Health Check: http://localhost:${port}/health`);
             console.log('='.repeat(50));
 
             console.log('\n🎯 CONTRIBUTIONS INTEGRATED:');
             console.log('   • Users & Categories (Uthman)');
             console.log('   • Inventory & Suppliers (Emmanuel)');
             console.log('   • Auth, Server Setup & Deployment (Yesid)');
+            console.log('='.repeat(50));
+
+            console.log('\n⚠️  WEEK 5 TESTING MODE:');
+            console.log('   OAuth authentication is DISABLED');
+            console.log('   All endpoints are accessible without login');
+            console.log('   Enable OAuth in Week 6 by uncommenting code');
             console.log('='.repeat(50));
         });
     }

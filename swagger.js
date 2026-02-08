@@ -31,61 +31,236 @@ const options = {
                     type: 'apiKey',
                     in: 'cookie',
                     name: 'connect.sid',
-                    description: 'Session cookie for authentication'
+                    description: 'Session cookie for authentication (Week 6 - Not required for Week 5 testing)'
                 }
             },
             schemas: {
-                // Global schema definitions so Swagger knows the expected structures
+                // ✅ ERROR SCHEMA - FIX PARA SWAGGER WARNINGS
+                Error: {
+                    type: 'object',
+                    properties: {
+                        success: {
+                            type: 'boolean',
+                            example: false,
+                            description: 'Indicates if the operation was successful'
+                        },
+                        message: {
+                            type: 'string',
+                            example: 'Error message description',
+                            description: 'Human-readable error message'
+                        },
+                        errors: {
+                            type: 'array',
+                            description: 'Detailed validation errors (optional)',
+                            items: {
+                                type: 'object',
+                                properties: {
+                                    field: {
+                                        type: 'string',
+                                        example: 'email'
+                                    },
+                                    message: {
+                                        type: 'string',
+                                        example: 'Invalid email format'
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    required: ['success', 'message']
+                },
+                
+                // USER SCHEMA
                 User: {
                     type: 'object',
+                    required: ['username', 'email'],
                     properties: {
-                        _id: { type: 'string' },
-                        username: { type: 'string' },
-                        email: { type: 'string' }
+                        _id: {
+                            type: 'string',
+                            description: 'MongoDB ObjectId',
+                            example: '507f1f77bcf86cd799439011'
+                        },
+                        username: {
+                            type: 'string',
+                            minLength: 3,
+                            description: 'Unique username',
+                            example: 'johndoe'
+                        },
+                        email: {
+                            type: 'string',
+                            format: 'email',
+                            description: 'User email address',
+                            example: 'john@example.com'
+                        },
+                        role: {
+                            type: 'string',
+                            enum: ['user', 'admin'],
+                            default: 'user',
+                            description: 'User role',
+                            example: 'user'
+                        },
+                        createdAt: {
+                            type: 'string',
+                            format: 'date-time',
+                            description: 'Account creation timestamp'
+                        },
+                        updatedAt: {
+                            type: 'string',
+                            format: 'date-time',
+                            description: 'Last update timestamp'
+                        }
                     }
                 },
+                
+                // CATEGORY SCHEMA
                 Category: {
                     type: 'object',
+                    required: ['name'],
                     properties: {
-                        _id: { type: 'string' },
-                        name: { type: 'string' },
-                        description: { type: 'string' }
+                        _id: {
+                            type: 'string',
+                            description: 'MongoDB ObjectId',
+                            example: '60d21b4667d0d8992e610c85'
+                        },
+                        name: {
+                            type: 'string',
+                            minLength: 2,
+                            maxLength: 50,
+                            description: 'Category name',
+                            example: 'Electronics'
+                        },
+                        description: {
+                            type: 'string',
+                            maxLength: 200,
+                            description: 'Category description',
+                            example: 'Electronic devices and gadgets'
+                        },
+                        isActive: {
+                            type: 'boolean',
+                            default: true,
+                            description: 'Category active status',
+                            example: true
+                        },
+                        createdAt: {
+                            type: 'string',
+                            format: 'date-time',
+                            description: 'Creation timestamp'
+                        },
+                        updatedAt: {
+                            type: 'string',
+                            format: 'date-time',
+                            description: 'Last update timestamp'
+                        }
                     }
                 },
+                
+                // INVENTORY SCHEMA
                 Inventory: {
                     type: 'object',
+                    required: ['name', 'quantity', 'price'],
                     properties: {
-                        _id: { type: 'string' },
-                        name: { type: 'string' },
-                        quantity: { type: 'integer' },
-                        price: { type: 'number' }
+                        _id: {
+                            type: 'string',
+                            description: 'MongoDB ObjectId',
+                            example: '60d21b4667d0d8992e610c86'
+                        },
+                        name: {
+                            type: 'string',
+                            description: 'Inventory item name',
+                            example: 'Laptop Dell XPS 15'
+                        },
+                        quantity: {
+                            type: 'integer',
+                            minimum: 0,
+                            description: 'Quantity in stock',
+                            example: 5
+                        },
+                        price: {
+                            type: 'number',
+                            format: 'float',
+                            minimum: 0,
+                            description: 'Item price',
+                            example: 1299.99
+                        },
+                        category: {
+                            type: 'string',
+                            description: 'Category ID reference',
+                            example: '60d21b4667d0d8992e610c85'
+                        },
+                        supplier: {
+                            type: 'string',
+                            description: 'Supplier ID reference',
+                            example: '60d21b4667d0d8992e610c87'
+                        },
+                        createdAt: {
+                            type: 'string',
+                            format: 'date-time'
+                        },
+                        updatedAt: {
+                            type: 'string',
+                            format: 'date-time'
+                        }
                     }
                 },
+                
+                // SUPPLIER SCHEMA
                 Supplier: {
                     type: 'object',
+                    required: ['name', 'contact'],
                     properties: {
-                        _id: { type: 'string' },
-                        name: { type: 'string' },
-                        contact: { type: 'string' }
+                        _id: {
+                            type: 'string',
+                            description: 'MongoDB ObjectId',
+                            example: '60d21b4667d0d8992e610c87'
+                        },
+                        name: {
+                            type: 'string',
+                            description: 'Supplier name',
+                            example: 'Tech Distributors Inc.'
+                        },
+                        contact: {
+                            type: 'string',
+                            description: 'Contact information',
+                            example: 'contact@techdist.com'
+                        },
+                        phone: {
+                            type: 'string',
+                            description: 'Phone number',
+                            example: '+1-555-0123'
+                        },
+                        address: {
+                            type: 'string',
+                            description: 'Supplier address',
+                            example: '123 Business St, Tech City, TC 12345'
+                        },
+                        createdAt: {
+                            type: 'string',
+                            format: 'date-time'
+                        },
+                        updatedAt: {
+                            type: 'string',
+                            format: 'date-time'
+                        }
                     }
                 }
             }
         },
-        security: [
-            {
-                sessionAuth: []
-            }
-        ]
+        // ⚠️ NOTA: Security global deshabilitada para Semana 5
+        // Para Semana 6, descomentar:
+        // security: [{ sessionAuth: [] }]
     },
     // Scan all .js files in the routes folder to extract documentation
-    apis: ['./routes/*.js']
+    apis: ['./routes/*.js', './routes/**/*.js']
 };
 
 const swaggerSpec = swaggerJsdoc(options);
 
 const swaggerDocs = (app) => {
     // Route that serves the Swagger UI interface
-    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+        customCss: '.swagger-ui .topbar { display: none }',
+        customSiteTitle: "PIEM API Documentation"
+    }));
 
     // Route that exposes the generated OpenAPI JSON
     app.get('/api-docs.json', (req, res) => {
@@ -93,7 +268,7 @@ const swaggerDocs = (app) => {
         res.send(swaggerSpec);
     });
 
-    console.log('Swagger docs available at /api-docs');
+    console.log('✅ Swagger docs available at /api-docs');
 };
 
 module.exports = swaggerDocs;

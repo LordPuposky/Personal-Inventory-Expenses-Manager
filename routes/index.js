@@ -6,9 +6,6 @@ router.get('/', (req, res) => {
     res.send('PIEM API is running with all collections');
 });
 
-// Documentation route (Swagger UI)
-router.use('/', require('./swagger'));
-
 // Uthman's collections: Users and Categories
 router.use('/users', require('./users'));
 router.use('/categories', require('./categories'));
