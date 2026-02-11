@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
 const categoriesController = require('../controllers/categoriesController');
-// const { isAuthenticated } = require('../middleware/auth'); // ⚠️ COMENTADO PARA SEMANA 5
 const { validate } = require('../middleware/validation');
 
 // Validation rules
@@ -184,7 +183,7 @@ router.get('/:id', categoriesController.getCategoryById);
  */
 router.post(
     '/',
-    // isAuthenticated, // ⚠️ COMENTADO PARA SEMANA 5
+    isAuthenticated,
     categoryValidationRules.create,
     validate,
     categoriesController.createCategory
@@ -254,7 +253,7 @@ router.post(
  */
 router.put(
     '/:id',
-    // isAuthenticated, // ⚠️ COMENTADO PARA SEMANA 5
+    isAuthenticated,
     categoryValidationRules.update,
     validate,
     categoriesController.updateCategory
@@ -306,6 +305,6 @@ router.put(
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.delete('/:id', /* isAuthenticated, */ categoriesController.deleteCategory);
+router.delete('/:id', isAuthenticated, categoriesController.deleteCategory);
 
 module.exports = router;

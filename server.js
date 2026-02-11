@@ -43,11 +43,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// ============================================
-// SESSION AND PASSPORT CONFIGURATION (OAuth)
-// ⚠️ DESHABILITADO TEMPORALMENTE PARA SEMANA 5
-// ============================================
-/*
+
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your-session-secret-key-here',
     resave: false,
@@ -75,13 +71,7 @@ passport.use(new GitHubStrategy({
 
 passport.serializeUser((user, done) => { done(null, user); });
 passport.deserializeUser((user, done) => { done(null, user); });
-*/
 
-// ============================================
-// AUTHENTICATION ROUTES
-// ⚠️ DESHABILITADO TEMPORALMENTE PARA SEMANA 5
-// ============================================
-/*
 app.get('/login', passport.authenticate('github', { scope: ['user:email'] }));
 
 app.get('/logout', function (req, res, next) {
@@ -98,7 +88,7 @@ app.get('/github/callback',
         res.redirect('/api-docs');
     }
 );
-*/
+
 
 // ============================================
 // API ROUTES

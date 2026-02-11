@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
 const usersController = require('../controllers/usersController');
-// const { isAuthenticated, isAdmin } = require('../middleware/auth'); // ⚠️ COMENTADO PARA SEMANA 5
+const { isAuthenticated, isAdmin } = require('../middleware/auth');
 const { validate } = require('../middleware/validation');
 
 // Validation rules
@@ -76,8 +76,7 @@ const userValidationRules = {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-// ⚠️ AUTENTICACIÓN REMOVIDA TEMPORALMENTE PARA SEMANA 5
-router.get('/', /* isAuthenticated, isAdmin, */ usersController.getAllUsers);
+router.get('/', usersController.getAllUsers);
 
 /**
  * @swagger
@@ -115,7 +114,7 @@ router.get('/', /* isAuthenticated, isAdmin, */ usersController.getAllUsers);
  *       500:
  *         description: Internal server error
  */
-router.get('/:id', /* isAuthenticated, */ usersController.getUserById);
+router.get('/:id', usersController.getUserById);
 
 /**
  * @swagger
@@ -172,7 +171,7 @@ router.get('/:id', /* isAuthenticated, */ usersController.getUserById);
  */
 router.post(
     '/',
-    /* isAuthenticated, isAdmin, */ // ⚠️ COMENTADO PARA SEMANA 5
+    isAuthenticated, isAdmin,
     userValidationRules.create,
     validate,
     usersController.createUser
@@ -227,7 +226,7 @@ router.post(
  */
 router.put(
     '/:id',
-    /* isAuthenticated, */ // ⚠️ COMENTADO PARA SEMANA 5
+    isAuthenticated,
     userValidationRules.update,
     validate,
     usersController.updateUser
@@ -259,6 +258,6 @@ router.put(
  *       500:
  *         description: Internal server error
  */
-router.delete('/:id', /* isAuthenticated, isAdmin, */ usersController.deleteUser);
+router.delete('/:id', isAuthenticated, isAdmin, usersController.deleteUser);
 
 module.exports = router;
