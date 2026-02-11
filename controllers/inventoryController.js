@@ -104,7 +104,7 @@ const updateInventory = async (req, res) => {
 const deleteInventory = async (req, res) => {
   try {
     const inventoryId = new ObjectId(req.params.id);
-    const db = mongodb.getDatabase();
+    const db = mongodb.getDb();
     const result = await db.collection('inventory').deleteOne({ _id: inventoryId });
     if (result.deletedCount > 0) {
       res.status(200).json({ message: 'Inventory item deleted successfully!' });
