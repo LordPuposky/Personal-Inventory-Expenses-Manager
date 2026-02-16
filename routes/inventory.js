@@ -2,6 +2,11 @@ const router = require('express').Router();
 const inventoryController = require('../controllers/inventoryController');
 const validate = require('../utilities/inventory-validation');
 
+// ============================================
+// MY PART: ADDED AUTHENTICATION MIDDLEWARE
+// ============================================
+const { isAuthenticated } = require('../middleware/auth');
+
 /**
  * @swagger
  * tags:
@@ -15,6 +20,8 @@ const validate = require('../utilities/inventory-validation');
  *   get:
  *     summary: Get all inventory items
  *     tags: [Inventory]
+ *     security:
+ *       - sessionAuth: []
  *     responses:
  *       200:
  *         description: Success
@@ -24,8 +31,13 @@ const validate = require('../utilities/inventory-validation');
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Inventory'
+ *       401:
+ *         description: Not authenticated
  */
-router.get('/', inventoryController.getAllInventory);
+// ============================================
+// MY PART: ADDED AUTHENTICATION TO GET ALL
+// ============================================
+router.get('/', isAuthenticated, inventoryController.getAllInventory);
 
 /**
  * @swagger
@@ -33,6 +45,8 @@ router.get('/', inventoryController.getAllInventory);
  *   get:
  *     summary: Get a single inventory item by ID
  *     tags: [Inventory]
+ *     security:
+ *       - sessionAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -42,10 +56,15 @@ router.get('/', inventoryController.getAllInventory);
  *     responses:
  *       200:
  *         description: Success
+ *       401:
+ *         description: Not authenticated
  *       404:
  *         description: Item not found
  */
-router.get('/:id', inventoryController.getSingleInventory);
+// ============================================
+// MY PART: ADDED AUTHENTICATION TO GET SINGLE
+// ============================================
+router.get('/:id', isAuthenticated, inventoryController.getSingleInventory);
 
 /**
  * @swagger
@@ -53,6 +72,8 @@ router.get('/:id', inventoryController.getSingleInventory);
  *   post:
  *     summary: Create a new inventory item
  *     tags: [Inventory]
+ *     security:
+ *       - sessionAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -62,8 +83,20 @@ router.get('/:id', inventoryController.getSingleInventory);
  *     responses:
  *       201:
  *         description: Created
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Not authenticated
  */
-router.post('/', validate.createInventory(), validate.checkInventoryData, inventoryController.createInventory);
+// ============================================
+// MY PART: ADDED AUTHENTICATION TO POST
+// ============================================
+router.post('/', 
+    isAuthenticated,
+    validate.createInventory(), 
+    validate.checkInventoryData, 
+    inventoryController.createInventory
+);
 
 /**
  * @swagger
@@ -71,6 +104,8 @@ router.post('/', validate.createInventory(), validate.checkInventoryData, invent
  *   put:
  *     summary: Update an existing inventory item
  *     tags: [Inventory]
+ *     security:
+ *       - sessionAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -84,10 +119,24 @@ router.post('/', validate.createInventory(), validate.checkInventoryData, invent
  *           schema:
  *             $ref: '#/components/schemas/Inventory'
  *     responses:
- *       204:
+ *       200:
  *         description: Updated
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Not authenticated
+ *       404:
+ *         description: Item not found
  */
-router.put('/:id', validate.updateInventory(), validate.checkInventoryUpdateData, inventoryController.updateInventory);
+// ============================================
+// MY PART: ADDED AUTHENTICATION TO PUT
+// ============================================
+router.put('/:id', 
+    isAuthenticated,
+    validate.updateInventory(), 
+    validate.checkInventoryUpdateData, 
+    inventoryController.updateInventory
+);
 
 /**
  * @swagger
@@ -95,6 +144,8 @@ router.put('/:id', validate.updateInventory(), validate.checkInventoryUpdateData
  *   delete:
  *     summary: Delete an inventory item
  *     tags: [Inventory]
+ *     security:
+ *       - sessionAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -104,7 +155,14 @@ router.put('/:id', validate.updateInventory(), validate.checkInventoryUpdateData
  *     responses:
  *       200:
  *         description: Deleted
+ *       401:
+ *         description: Not authenticated
+ *       404:
+ *         description: Item not found
  */
-router.delete('/:id', inventoryController.deleteInventory);
+// ============================================
+// MY PART: ADDED AUTHENTICATION TO DELETE
+// ============================================
+router.delete('/:id', isAuthenticated, inventoryController.deleteInventory);
 
 module.exports = router;
