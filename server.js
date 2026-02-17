@@ -1,8 +1,8 @@
 const express = require('express');
 const mongodb = require('./db/connect');
-// const session = require('express-session');
-// const passport = require('passport');
-// const GitHubStrategy = require('passport-github2').Strategy;
+const session = require('express-session');
+const passport = require('passport');
+const GitHubStrategy = require('passport-github2').Strategy;
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
