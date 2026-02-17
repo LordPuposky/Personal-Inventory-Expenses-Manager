@@ -26,11 +26,10 @@ app.use(compression());
 app.use(express.json());
 
 // CORS configuration
+// En server.js
 app.use(cors({
-    origin: [
-        'https://personal-inventory-expenses-manager-api.onrender.com',
-        'http://localhost:8080'
-    ],
+    origin: 'https://personal-inventory-expenses-manager-api.onrender.com',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true
 }));
 
