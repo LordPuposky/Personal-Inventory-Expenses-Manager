@@ -27,7 +27,10 @@ app.use(express.json());
 
 // CORS configuration
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || '*',
+    origin: [
+        'https://personal-inventory-expenses-manager-api.onrender.com',
+        'http://localhost:8080'
+    ],
     credentials: true
 }));
 
@@ -49,8 +52,9 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
+        secure: true,
         httpOnly: true,
+        sameSite: 'none',
         maxAge: 24 * 60 * 60 * 1000
     }
 }));
@@ -169,7 +173,7 @@ mongodb.initDb((err, mongodb) => {
             console.log('   • Auth, Server Setup & Deployment (Yesid)');
             console.log('='.repeat(50));
 
-            console.log('\n⚠️  WEEK 5 TESTING MODE:');
+            console.log(`⚠️  Mode: WEEK 6 - OAuth Enabled`);
             console.log('   OAuth authentication is DISABLED');
             console.log('   All endpoints are accessible without login');
             console.log('   Enable OAuth in Week 6 by uncommenting code');
