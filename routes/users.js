@@ -1,4 +1,4 @@
-const { isAuthenticated } = require('../middleware/auth');
+const { isAuthenticated, isAdmin } = require('../middleware/auth');
 const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
