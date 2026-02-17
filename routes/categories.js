@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
 const categoriesController = require('../controllers/categoriesController');
-const { isAuthenticated } = require('../middleware/auth');
 const { validate } = require('../middleware/validation');
 
 // Validation rules
@@ -50,8 +49,6 @@ const categoryValidationRules = {
  *     summary: Get all categories
  *     description: Retrieve a list of all inventory categories with optional filtering by active status
  *     tags: [Categories]
- *     security:
- *       - sessionAuth: []
  *     parameters:
  *       - in: query
  *         name: active
@@ -72,17 +69,11 @@ const categoryValidationRules = {
  *                   example: true
  *                 count:
  *                   type: integer
- *                   example: 10
+ *                   example: 5
  *                 data:
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Category'
- *       401:
- *         description: Not authenticated - Login required
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  *       500:
  *         description: Internal server error
  *         content:
@@ -90,26 +81,21 @@ const categoryValidationRules = {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/', isAuthenticated, categoriesController.getAllCategories);
+router.get('/', categoriesController.getAllCategories);
 
 /**
  * @swagger
  * /categories/{id}:
  *   get:
  *     summary: Get a specific category by ID
- *     description: Retrieve detailed information about a single category including creator details
  *     tags: [Categories]
- *     security:
- *       - sessionAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *           pattern: '^[0-9a-fA-F]{24}$'
- *         description: MongoDB ObjectId of the category
- *         example: 507f1f77bcf86cd799439011
+ *         description: The category ID
  *     responses:
  *       200:
  *         description: Successfully retrieved category details
@@ -124,13 +110,7 @@ router.get('/', isAuthenticated, categoriesController.getAllCategories);
  *                 data:
  *                   $ref: '#/components/schemas/Category'
  *       400:
- *         description: Invalid category ID format
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       401:
- *         description: Not authenticated
+ *         description: Invalid ID format
  *         content:
  *           application/json:
  *             schema:
@@ -148,17 +128,14 @@ router.get('/', isAuthenticated, categoriesController.getAllCategories);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/:id', isAuthenticated, categoriesController.getCategoryById);
+router.get('/:id', categoriesController.getCategoryById);
 
 /**
  * @swagger
  * /categories:
  *   post:
  *     summary: Create a new category
- *     description: Create a new inventory category. Category will be linked to the authenticated user.
  *     tags: [Categories]
- *     security:
- *       - sessionAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -170,15 +147,10 @@ router.get('/:id', isAuthenticated, categoriesController.getCategoryById);
  *             properties:
  *               name:
  *                 type: string
- *                 minLength: 2
- *                 maxLength: 50
- *                 description: Unique category name
  *                 example: Electronics
  *               description:
  *                 type: string
- *                 maxLength: 200
- *                 description: Optional category description
- *                 example: Electronic devices and accessories
+ *                 example: Electronic devices and gadgets
  *     responses:
  *       201:
  *         description: Category created successfully
@@ -193,22 +165,11 @@ router.get('/:id', isAuthenticated, categoriesController.getCategoryById);
  *                 message:
  *                   type: string
  *                   example: Category created successfully
- *                 data:
- *                   $ref: '#/components/schemas/Category'
+ *                 categoryId:
+ *                   type: string
+ *                   example: 60d21b4667d0d8992e610c85
  *       400:
  *         description: Validation error or missing required fields
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       401:
- *         description: Not authenticated
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       409:
- *         description: Conflict - Category with this name already exists
  *         content:
  *           application/json:
  *             schema:
@@ -233,19 +194,14 @@ router.post(
  * /categories/{id}:
  *   put:
  *     summary: Update an existing category
- *     description: Update category information. Only the creator or admin can update the category.
  *     tags: [Categories]
- *     security:
- *       - sessionAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *           pattern: '^[0-9a-fA-F]{24}$'
- *         description: MongoDB ObjectId of the category to update
- *         example: 507f1f77bcf86cd799439011
+ *         description: The category ID
  *     requestBody:
  *       required: true
  *       content:
@@ -255,13 +211,10 @@ router.post(
  *             properties:
  *               name:
  *                 type: string
- *                 minLength: 2
- *                 maxLength: 50
- *                 example: Updated Category Name
+ *                 example: Home & Garden
  *               description:
  *                 type: string
- *                 maxLength: 200
- *                 example: Updated description
+ *                 example: Items for home and outdoor use
  *               isActive:
  *                 type: boolean
  *                 example: true
@@ -279,34 +232,14 @@ router.post(
  *                 message:
  *                   type: string
  *                   example: Category updated successfully
- *                 data:
- *                   $ref: '#/components/schemas/Category'
  *       400:
  *         description: Invalid ID or validation error
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
- *       401:
- *         description: Not authenticated
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       403:
- *         description: Forbidden - Cannot update categories created by other users
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  *       404:
  *         description: Category not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       409:
- *         description: Conflict - Category with this name already exists
  *         content:
  *           application/json:
  *             schema:
@@ -331,19 +264,14 @@ router.put(
  * /categories/{id}:
  *   delete:
  *     summary: Delete a category
- *     description: Permanently delete a category. Only the creator or admin can delete. Cannot delete categories with existing items.
  *     tags: [Categories]
- *     security:
- *       - sessionAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *           pattern: '^[0-9a-fA-F]{24}$'
- *         description: MongoDB ObjectId of the category to delete
- *         example: 507f1f77bcf86cd799439011
+ *         description: The category ID
  *     responses:
  *       200:
  *         description: Category deleted successfully
@@ -360,18 +288,6 @@ router.put(
  *                   example: Category deleted successfully
  *       400:
  *         description: Invalid ID or category has existing items
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       401:
- *         description: Not authenticated
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       403:
- *         description: Forbidden - Cannot delete categories created by other users
  *         content:
  *           application/json:
  *             schema:
