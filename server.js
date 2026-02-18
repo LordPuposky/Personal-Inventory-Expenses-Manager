@@ -21,31 +21,20 @@ const app = express();
 // ============================================
 // SECURITY AND PERFORMANCE MIDDLEWARE
 // ============================================
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: false,
+}));
 app.use(compression());
 app.use(express.json());
 
-// CORS configuration
-// En server.js
+// CORS CONFIGURATION (CRITICAL FOR COOKIES
 app.use(cors({
     origin: 'https://personal-inventory-expenses-manager-api.onrender.com',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true
 }));
 
-// Manual CORS headers (extra layer)
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || '*');
-    res.setHeader(
-        'Access-Control-Allow-Headers',
-        'Origin, X-Requested-With, Content-Type, Accept, Z-Key, Authorization'
-    );
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    next();
-});
-
-
+// SESSION CONFIGURATION (OPTIMIZED FOR RENDER/HTTPS)
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your-session-secret-key-here',
     resave: false,
@@ -54,7 +43,7 @@ app.use(session({
         secure: true,
         httpOnly: true,
         sameSite: 'none',
-        maxAge: 24 * 60 * 60 * 1000
+        maxAge: 24 * 60 * 60 * 1000 // 24 horas
     }
 }));
 
@@ -75,23 +64,29 @@ passport.use(new GitHubStrategy({
 passport.serializeUser((user, done) => { done(null, user); });
 passport.deserializeUser((user, done) => { done(null, user); });
 
+// ============================================
+// AUTH ROUTES
+// ============================================
+
 app.get('/login', passport.authenticate('github', { scope: ['user:email'] }));
 
+// FIXED LOGOUT: Destroys session and clears cookie
 app.get('/logout', function (req, res, next) {
     req.logout(function (err) {
         if (err) { return next(err); }
-        res.redirect('/');
+        req.session.destroy(function (err) {
+            res.clearCookie('connect.sid', { path: '/' });
+            res.redirect('/api-docs');
+        });
     });
 });
 
 app.get('/github/callback',
     passport.authenticate('github', { failureRedirect: '/api-docs' }),
     function (req, res) {
-        // On successful login, redirect to Swagger docs
         res.redirect('/api-docs');
     }
 );
-
 
 // ============================================
 // API ROUTES
@@ -105,7 +100,7 @@ app.get('/health', (req, res) => {
         timestamp: new Date().toISOString(),
         service: 'Personal Inventory & Expenses Manager',
         version: '1.0.0',
-        mode: 'Week 5 - OAuth Disabled',
+        mode: 'Week 6 - OAuth Enabled',
         database: mongodb.getDb() ? 'connected' : 'disconnected'
     });
 });
@@ -123,7 +118,6 @@ swaggerDocs(app);
 // ERROR HANDLING
 // ============================================
 
-// 404 handler
 app.use((req, res) => {
     res.status(404).json({
         success: false,
@@ -132,7 +126,6 @@ app.use((req, res) => {
     });
 });
 
-// Global error handler
 app.use((err, req, res, next) => {
     console.error('Server Error:', err.stack);
     const statusCode = err.statusCode || 500;
@@ -161,21 +154,14 @@ mongodb.initDb((err, mongodb) => {
             console.log(`✅ Server started successfully!`);
             console.log(`📡 Port: ${port}`);
             console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-            console.log(`⚠️  Mode: WEEK 5 - OAuth Disabled`);
-            console.log(`📚 API Documentation: http://localhost:${port}/api-docs`);
-            console.log(`❤️  Health Check: http://localhost:${port}/health`);
+            console.log(`⚠️  Mode: WEEK 6 - OAuth Enabled`);
+            console.log(`📚 API Documentation: https://personal-inventory-expenses-manager-api.onrender.com/api-docs`);
             console.log('='.repeat(50));
 
             console.log('\n🎯 CONTRIBUTIONS INTEGRATED:');
             console.log('   • Users & Categories (Uthman)');
             console.log('   • Inventory & Suppliers (Emmanuel)');
             console.log('   • Auth, Server Setup & Deployment (Yesid)');
-            console.log('='.repeat(50));
-
-            console.log(`⚠️  Mode: WEEK 6 - OAuth Enabled`);
-            console.log('   OAuth authentication is DISABLED');
-            console.log('   All endpoints are accessible without login');
-            console.log('   Enable OAuth in Week 6 by uncommenting code');
             console.log('='.repeat(50));
         });
     }
