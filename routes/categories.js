@@ -82,7 +82,7 @@ const categoryValidationRules = {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/', categoriesController.getAllCategories);
+router.get('/', isAuthenticated, categoriesController.getAllCategories);
 
 /**
  * @swagger
@@ -129,7 +129,7 @@ router.get('/', categoriesController.getAllCategories);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/:id', categoriesController.getCategoryById);
+router.get('/', isAuthenticated, categoriesController.getAllCategories);
 
 /**
  * @swagger

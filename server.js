@@ -23,13 +23,12 @@ app.set('trust proxy', 1);
 // SECURITY AND PERFORMANCE MIDDLEWARE
 // ============================================
 app.use(helmet({
-    contentSecurityPolicy: false, // Permite que Swagger UI cargue correctamente
+    contentSecurityPolicy: false,
 }));
 app.use(compression());
 app.use(express.json());
 
 // CORS CONFIGURATION (PROFESSIONAL FIX)
-// No usar '*' junto con credentials:true. Debe ser el origen exacto.
 app.use(cors({
     origin: 'https://personal-inventory-expenses-manager-api.onrender.com',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
