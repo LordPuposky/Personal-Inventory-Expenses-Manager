@@ -69,7 +69,7 @@ const options = {
                     },
                     required: ['success', 'message']
                 },
-                
+
                 // USER SCHEMA
                 User: {
                     type: 'object',
@@ -111,7 +111,7 @@ const options = {
                         }
                     }
                 },
-                
+
                 // CATEGORY SCHEMA
                 Category: {
                     type: 'object',
@@ -153,7 +153,7 @@ const options = {
                         }
                     }
                 },
-                
+
                 // INVENTORY SCHEMA
                 Inventory: {
                     type: 'object',
@@ -202,7 +202,7 @@ const options = {
                         }
                     }
                 },
-                
+
                 // SUPPLIER SCHEMA
                 Supplier: {
                     type: 'object',
@@ -256,19 +256,23 @@ const options = {
 const swaggerSpec = swaggerJsdoc(options);
 
 const swaggerDocs = (app) => {
-    // Route that serves the Swagger UI interface
-    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    const uiOptions = {
+        swaggerOptions: {
+            withCredentials: true,
+            persistAuthorization: true
+        },
         customCss: '.swagger-ui .topbar { display: none }',
         customSiteTitle: "PIEM API Documentation"
-    }));
+    };
 
-    // Route that exposes the generated OpenAPI JSON
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, uiOptions));
+
     app.get('/api-docs.json', (req, res) => {
         res.setHeader('Content-Type', 'application/json');
         res.send(swaggerSpec);
     });
 
-    console.log('✅ Swagger docs available at /api-docs');
+    console.log('✅ Swagger docs configured with credentials support');
 };
 
 module.exports = swaggerDocs;

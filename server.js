@@ -30,7 +30,6 @@ app.use(express.json());
 // CORS CONFIGURATION (CRITICAL FOR COOKIES
 app.use(cors({
     origin: 'https://personal-inventory-expenses-manager-api.onrender.com',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true
 }));
 
@@ -74,15 +73,13 @@ app.get('/login', passport.authenticate('github', { scope: ['user:email'] }));
 app.get('/logout', function (req, res, next) {
     req.logout(function (err) {
         if (err) { return next(err); }
-        
-        // Esto destruye la sesión en el servidor
-        req.session.destroy(function(err) {
+        req.session.destroy(function (err) {
             res.clearCookie('connect.sid', {
                 path: '/',
                 secure: true,
                 sameSite: 'none'
             });
-            
+
             res.send(`
                 <h1>Logged Out Successfully</h1>
                 <p>Your session has been destroyed.</p>
