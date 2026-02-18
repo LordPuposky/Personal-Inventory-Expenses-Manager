@@ -15,27 +15,23 @@ const options = {
         },
         servers: [
             {
-                // Main production URL on Render
                 url: 'https://personal-inventory-expenses-manager-api.onrender.com',
                 description: 'Production server (Render)'
             },
             {
-                // Local development server on port 8080
                 url: 'http://localhost:8080',
                 description: 'Local development server'
             }
         ],
         components: {
             securitySchemes: {
-                sessionAuth: {
+                cookieAuth: {
                     type: 'apiKey',
                     in: 'cookie',
-                    name: 'connect.sid',
-                    description: 'Session cookie for authentication (Week 6 - Not required for Week 5 testing)'
+                    name: 'connect.sid'
                 }
             },
             schemas: {
-                // ✅ ERROR SCHEMA - FIX PARA SWAGGER WARNINGS
                 Error: {
                     type: 'object',
                     properties: {
@@ -70,7 +66,6 @@ const options = {
                     required: ['success', 'message']
                 },
 
-                // USER SCHEMA
                 User: {
                     type: 'object',
                     required: ['username', 'email'],
@@ -112,7 +107,6 @@ const options = {
                     }
                 },
 
-                // CATEGORY SCHEMA
                 Category: {
                     type: 'object',
                     required: ['name'],
@@ -154,7 +148,6 @@ const options = {
                     }
                 },
 
-                // INVENTORY SCHEMA
                 Inventory: {
                     type: 'object',
                     required: ['name', 'quantity', 'price'],
@@ -203,7 +196,6 @@ const options = {
                     }
                 },
 
-                // SUPPLIER SCHEMA
                 Supplier: {
                     type: 'object',
                     required: ['name', 'contact'],
@@ -244,12 +236,8 @@ const options = {
                     }
                 }
             }
-        },
-        // ⚠️ NOTA: Security global deshabilitada para Semana 5
-        // Para Semana 6, descomentar:
-        // security: [{ sessionAuth: [] }]
+        }
     },
-    // Scan all .js files in the routes folder to extract documentation
     apis: ['./routes/*.js', './routes/**/*.js']
 };
 
