@@ -236,7 +236,13 @@ const options = {
                     }
                 }
             }
-        }
+        },
+        
+        //security: [
+            //{
+                cookieAuth: []
+           // }
+        //]
     },
     apis: ['./routes/*.js', './routes/**/*.js']
 };
@@ -244,16 +250,14 @@ const options = {
 const swaggerSpec = swaggerJsdoc(options);
 
 const swaggerDocs = (app) => {
-    const uiOptions = {
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
         swaggerOptions: {
             withCredentials: true,
             persistAuthorization: true
         },
         customCss: '.swagger-ui .topbar { display: none }',
         customSiteTitle: "PIEM API Documentation"
-    };
-
-    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, uiOptions));
+    }));
 
     app.get('/api-docs.json', (req, res) => {
         res.setHeader('Content-Type', 'application/json');

@@ -17,32 +17,35 @@ const categoryRoutes = require('./routes/categories');
 
 const port = process.env.PORT || 8080;
 const app = express();
+app.set('trust proxy', 1);
 
 // ============================================
 // SECURITY AND PERFORMANCE MIDDLEWARE
 // ============================================
 app.use(helmet({
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: false, // Permite que Swagger UI cargue correctamente
 }));
 app.use(compression());
 app.use(express.json());
 
-// CORS CONFIGURATION (CRITICAL FOR COOKIES
+// CORS CONFIGURATION (PROFESSIONAL FIX)
+// No usar '*' junto con credentials:true. Debe ser el origen exacto.
 app.use(cors({
     origin: 'https://personal-inventory-expenses-manager-api.onrender.com',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true
 }));
 
 // SESSION CONFIGURATION (OPTIMIZED FOR RENDER/HTTPS)
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your-session-secret-key-here',
-    resave: false,
-    saveUninitialized: false,
+    resave: true,
+    saveUninitialized: true,
     cookie: {
         secure: true,
         httpOnly: true,
         sameSite: 'none',
-        maxAge: 24 * 60 * 60 * 1000 // 24 horas
+        maxAge: 24 * 60 * 60 * 1000
     }
 }));
 
@@ -69,7 +72,7 @@ passport.deserializeUser((user, done) => { done(null, user); });
 
 app.get('/login', passport.authenticate('github', { scope: ['user:email'] }));
 
-// FIXED LOGOUT: Destroys session and clears cookie
+// FIXED LOGOUT: Destroys session and clears cookie visually
 app.get('/logout', function (req, res, next) {
     req.logout(function (err) {
         if (err) { return next(err); }
@@ -81,9 +84,11 @@ app.get('/logout', function (req, res, next) {
             });
 
             res.send(`
-                <h1>Logged Out Successfully</h1>
-                <p>Your session has been destroyed.</p>
-                <a href="/api-docs">Return to Documentation</a>
+                <div style="text-align: center; margin-top: 50px; font-family: sans-serif;">
+                    <h1>✅ Logged Out Successfully</h1>
+                    <p>Your session has been destroyed and cookies cleared.</p>
+                    <a href="/api-docs" style="color: #007bff; text-decoration: none;">Click here to return to API Docs</a>
+                </div>
             `);
         });
     });
@@ -100,7 +105,6 @@ app.get('/github/callback',
 // API ROUTES
 // ============================================
 
-// Health check endpoint
 app.get('/health', (req, res) => {
     res.status(200).json({
         success: true,
@@ -116,10 +120,10 @@ app.get('/health', (req, res) => {
 app.use('/users', userRoutes);
 app.use('/categories', categoryRoutes);
 
-// Integrated team routes (Inventory, Suppliers, etc.)
+// Integrated team routes
 app.use('/', require('./routes'));
 
-// Initialize Swagger
+// Initialize Swagger (Recuerda aplicar el cambio de withCredentials en swagger.js)
 swaggerDocs(app);
 
 // ============================================
@@ -164,12 +168,6 @@ mongodb.initDb((err, mongodb) => {
             console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
             console.log(`⚠️  Mode: WEEK 6 - OAuth Enabled`);
             console.log(`📚 API Documentation: https://personal-inventory-expenses-manager-api.onrender.com/api-docs`);
-            console.log('='.repeat(50));
-
-            console.log('\n🎯 CONTRIBUTIONS INTEGRATED:');
-            console.log('   • Users & Categories (Uthman)');
-            console.log('   • Inventory & Suppliers (Emmanuel)');
-            console.log('   • Auth, Server Setup & Deployment (Yesid)');
             console.log('='.repeat(50));
         });
     }
