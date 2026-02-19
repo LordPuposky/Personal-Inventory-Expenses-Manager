@@ -1,49 +1,55 @@
 const { body, validationResult, param } = require("express-validator")
 const validate = {}
 
-// Validation rules for creating a new supplier
+// Validation rules for creating a new supplier (8 fields)
 validate.createSupplier = () => {
     return [
         body('name')
             .trim()
             .escape()
             .notEmpty()
-            .withMessage('Supplier name is required')
-            .isLength({ min: 2, max: 100 })
-            .withMessage('Name must be between 2 and 100 characters long'),
-        
+            .withMessage('Supplier name is required'),
+
+        body('contactName')
+            .trim()
+            .escape()
+            .notEmpty()
+            .withMessage('Contact name is required'),
+
         body('email')
             .trim()
             .toLowerCase()
             .isEmail()
-            .withMessage('Email must be a valid email address'),
-        
+            .withMessage('Valid email is required'),
+
         body('phone')
             .trim()
             .notEmpty()
-            .withMessage('Phone number is required')
-            .matches(/^[0-9\-\+\(\)\s]+$/)
-            .withMessage('Phone number format is invalid'),
-        
+            .withMessage('Phone number is required'),
+
         body('address')
             .trim()
             .escape()
             .notEmpty()
-            .withMessage('Address is required')
-            .isLength({ min: 5, max: 500 })
-            .withMessage('Address must be between 5 and 500 characters long'),
-        
-        body('status')
+            .withMessage('Address is required'),
+
+        body('city')
             .trim()
+            .escape()
             .notEmpty()
-            .withMessage('Status is required')
-            .isIn(['Active', 'Inactive', 'Pending'])
-            .withMessage('Status must be one of: Active, Inactive, or Pending'),
-        
-        body('productsSupplied')
+            .withMessage('City is required'),
+
+        body('state')
             .trim()
+            .escape()
             .notEmpty()
-            .withMessage('At least one product must be supplied')
+            .withMessage('State is required'),
+
+        body('zipCode')
+            .trim()
+            .escape()
+            .notEmpty()
+            .withMessage('Zip Code is required')
     ]
 };
 
@@ -56,47 +62,49 @@ validate.checkSupplierData = (req, res, next) => {
     next();
 };
 
-// Validation rules for updating a supplier
+// Validation rules for updating a supplier (8 fields optional)
 validate.updateSupplier = () => {
     return [
         body('name')
             .optional()
             .trim()
-            .escape()
-            .isLength({ min: 2, max: 100 })
-            .withMessage('Name must be between 2 and 100 characters long'),
-        
+            .escape(),
+
+        body('contactName')
+            .optional()
+            .trim()
+            .escape(),
+
         body('email')
             .optional()
             .trim()
             .toLowerCase()
             .isEmail()
-            .withMessage('Email must be a valid email address'),
-        
+            .withMessage('Email must be valid if provided'),
+
         body('phone')
             .optional()
-            .trim()
-            .matches(/^[0-9\-\+\(\)\s]+$/)
-            .withMessage('Phone number format is invalid'),
-        
+            .trim(),
+
         body('address')
             .optional()
             .trim()
+            .escape(),
+
+        body('city')
+            .optional()
+            .trim()
+            .escape(),
+
+        body('state')
+            .optional()
+            .trim()
+            .escape(),
+
+        body('zipCode')
+            .optional()
+            .trim()
             .escape()
-            .isLength({ min: 5, max: 500 })
-            .withMessage('Address must be between 5 and 500 characters long'),
-        
-        body('status')
-            .optional()
-            .trim()
-            .isIn(['Active', 'Inactive', 'Pending'])
-            .withMessage('Status must be one of: Active, Inactive, or Pending'),
-        
-        body('productsSupplied')
-            .optional()
-            .trim()
-            .notEmpty()
-            .withMessage('At least one product must be supplied if provided')
     ]
 };
 

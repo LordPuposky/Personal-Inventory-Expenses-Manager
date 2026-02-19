@@ -196,9 +196,10 @@ const options = {
                     }
                 },
 
+                // CORREGIDO: Supplier schema definido correctamente
                 Supplier: {
                     type: 'object',
-                    required: ['name', 'contact'],
+                    required: ['name', 'email'],
                     properties: {
                         _id: {
                             type: 'string',
@@ -207,23 +208,44 @@ const options = {
                         },
                         name: {
                             type: 'string',
-                            description: 'Supplier name',
-                            example: 'Tech Distributors Inc.'
+                            example: 'Global Electronics',
+                            description: 'Supplier company name'
                         },
-                        contact: {
+                        contactName: {
                             type: 'string',
-                            description: 'Contact information',
-                            example: 'contact@techdist.com'
+                            example: 'John Doe',
+                            description: 'Contact person name'
+                        },
+                        email: {
+                            type: 'string',
+                            format: 'email',
+                            example: 'john@globalelectronics.com',
+                            description: 'Supplier email address'
                         },
                         phone: {
                             type: 'string',
-                            description: 'Phone number',
-                            example: '+1-555-0123'
+                            example: '+1-555-0123',
+                            description: 'Contact phone number'
                         },
                         address: {
                             type: 'string',
-                            description: 'Supplier address',
-                            example: '123 Business St, Tech City, TC 12345'
+                            example: '123 Business St',
+                            description: 'Street address'
+                        },
+                        city: {
+                            type: 'string',
+                            example: 'Tech City',
+                            description: 'City'
+                        },
+                        state: {
+                            type: 'string',
+                            example: 'California',
+                            description: 'State/Province'
+                        },
+                        zipCode: {
+                            type: 'string',
+                            example: '94043',
+                            description: 'Postal/ZIP code'
                         },
                         createdAt: {
                             type: 'string',
@@ -237,12 +259,11 @@ const options = {
                 }
             }
         },
-        
-        //security: [
-            //{
+        security: [
+            {
                 cookieAuth: []
-           // }
-        //]
+            }
+        ]
     },
     apis: ['./routes/*.js', './routes/**/*.js']
 };

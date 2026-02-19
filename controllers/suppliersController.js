@@ -28,7 +28,7 @@ const getSingleSupplier = async (req, res) => {
         }
 
         res.status(200).json(result);
-    }   catch (error) {
+    } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
@@ -37,27 +37,31 @@ const createSupplier = async (req, res) => {
     try {
         const {
             name,
+            contactName,
             email,
             phone,
             address,
-            status,
-            productsSupplied
-
-
-
+            city,
+            state,
+            zipCode
         } = req.body;
 
-        if (!name || !email || !phone || !address || !status || !productsSupplied) {
-            return res.status(400).json({ message: 'All fields are required' });
+        if (!name || !contactName || !email || !phone || !address || !city || !state || !zipCode) {
+            return res.status(400).json({ message: 'All 8 fields are required' });
         }
+
         const newSupplier = {
             name,
+            contactName,
             email,
             phone,
             address,
-            status,
-            productsSupplied
-        }
+            city,
+            state,
+            zipCode,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
         const db = mongodb.getDb();
         const result = await db.collection('suppliers').insertOne(newSupplier);
 
@@ -78,11 +82,14 @@ const updateSupplier = async (req, res) => {
         const supplierId = new ObjectId(req.params.id);
         const updatedSupplier = {
             name: req.body.name,
+            contactName: req.body.contactName,
             email: req.body.email,
             phone: req.body.phone,
             address: req.body.address,
-            status: req.body.status,
-            productsSupplied: req.body.productsSupplied
+            city: req.body.city,
+            state: req.body.state,
+            zipCode: req.body.zipCode,
+            updatedAt: new Date()
         };
         const db = mongodb.getDb();
         const result = await db.collection('suppliers').replaceOne(
@@ -99,31 +106,31 @@ const updateSupplier = async (req, res) => {
 };
 
 const deleteSupplier = async (req, res) => {
-  try {
-    const supplierId = new ObjectId(req.params.id);
-    const db = mongodb.getDb();
-    const result = await db.collection('suppliers').deleteOne({ _id: supplierId });
-    if (result.deletedCount > 0) {
-      res.status(200).json({ message: 'Supplier deleted successfully!' });
-    } else {
-      res.status(404).json({ message: 'Supplier not found!' });
+    try {
+        const supplierId = new ObjectId(req.params.id);
+        const db = mongodb.getDb();
+        const result = await db.collection('suppliers').deleteOne({ _id: supplierId });
+        if (result.deletedCount > 0) {
+            res.status(200).json({ message: 'Supplier deleted successfully!' });
+        } else {
+            res.status(404).json({ message: 'Supplier not found!' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
 };
 
 
 
 
-module.exports = { 
-    getAllSuppliers, 
+module.exports = {
+    getAllSuppliers,
     getSingleSupplier,
     createSupplier,
     updateSupplier,
     deleteSupplier
- };
-           
+};
+
 
 
 
