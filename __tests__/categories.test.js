@@ -4,7 +4,8 @@ const mongodb = require('../db/connect');
 const router = require('../routes/categories');
 
 jest.mock('../middleware/auth', () => ({
-    isAuthenticated: (req, res, next) => next()
+    isAuthenticated: (req, res, next) => next(),
+    isAdmin: (req, res, next) => next()
 }));
 
 const app = express();

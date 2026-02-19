@@ -5,7 +5,8 @@ const router = require('../routes/supplier');
 
 // Mock authentication to allow access to protected routes during testing
 jest.mock('../middleware/auth', () => ({
-    isAuthenticated: (req, res, next) => next()
+    isAuthenticated: (req, res, next) => next(),
+    isAdmin: (req, res, next) => next()
 }));
 
 const app = express();

@@ -5,12 +5,9 @@ const getAllSuppliers = async (req, res) => {
     try {
         const db = await mongodb.getDb();
         const results = await db.collection('suppliers').find().toArray();
-        if (results.length === 0) {
-            return res.status(404).json({ message: 'No suppliers found' });
-        }
-        else {
-            res.status(200).json(results);
-        }
+        
+        res.status(200).json(results);
+        
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

@@ -5,19 +5,16 @@ const getAllInventory = async (req, res) => {
     try {
         const db = await mongodb.getDb();
         const results = await db.collection('inventory').find().toArray();
-        if (results.length === 0) {
-            return res.status(404).json({ message: 'No inventory items found' });
-        }
-        else {
-            res.status(200).json(results);
-        }
+
+        res.status(200).json(results);
+
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
+
 // get a single inventory item by ID
 const getSingleInventory = async (req, res) => {
-
     try {
         const inventoryId = new ObjectId(req.params.id);
         const db = mongodb.getDb();
@@ -28,7 +25,7 @@ const getSingleInventory = async (req, res) => {
         }
 
         res.status(200).json(result);
-    }   catch (error) {
+    } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
@@ -43,9 +40,6 @@ const createInventory = async (req, res) => {
             price,
             status,
             supplier
-
-
-
         } = req.body;
 
         if (!name || !category || !quantity || !description || !price || !status || !supplier) {
@@ -72,7 +66,6 @@ const createInventory = async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-
 };
 
 const updateInventory = async (req, res) => {
@@ -102,27 +95,24 @@ const updateInventory = async (req, res) => {
 };
 
 const deleteInventory = async (req, res) => {
-  try {
-    const inventoryId = new ObjectId(req.params.id);
-    const db = mongodb.getDb();
-    const result = await db.collection('inventory').deleteOne({ _id: inventoryId });
-    if (result.deletedCount > 0) {
-      res.status(200).json({ message: 'Inventory item deleted successfully!' });
-    } else {
-      res.status(404).json({ message: 'Inventory item not found!' });
+    try {
+        const inventoryId = new ObjectId(req.params.id);
+        const db = mongodb.getDb();
+        const result = await db.collection('inventory').deleteOne({ _id: inventoryId });
+        if (result.deletedCount > 0) {
+            res.status(200).json({ message: 'Inventory item deleted successfully!' });
+        } else {
+            res.status(404).json({ message: 'Inventory item not found!' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
 };
 
-
-
-
-module.exports = { 
-    getAllInventory, 
+module.exports = {
+    getAllInventory,
     getSingleInventory,
     createInventory,
     updateInventory,
     deleteInventory
- };
+};

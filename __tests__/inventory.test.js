@@ -1,10 +1,11 @@
 const request = require('supertest');
 const express = require('express');
 const mongodb = require('../db/connect');
-const router = require('../routes/inventory'); 
+const router = require('../routes/inventory');
 
 jest.mock('../middleware/auth', () => ({
-    isAuthenticated: (req, res, next) => next()
+    isAuthenticated: (req, res, next) => next(),
+    isAdmin: (req, res, next) => next()
 }));
 
 const app = express();
